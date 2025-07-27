@@ -1,0 +1,5 @@
+fastapi
+uvicorn[standard]
+sentence-transformers==2.7.0
+torch            # CPU wheels work fine; add CUDA if you wish
+pydantic

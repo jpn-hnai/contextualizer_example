@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  # ------------- vector store -------------
+  qdrant:
+    image: qdrant/qdrant:v1.9.0
+    volumes:
+      - qdrant_data:/qdrant/storage
+    ports:
+      - "6333:6333"
+
+  # ------------- embedding head -----------
+  embed_head:
+    build: ./embed_head
+    restart: unless-stopped
+    ports:
+      - "8100:8000"
+
+
+  # ------------- write path ---------------
+  ingestor:
+    build: ./ingestor
+    env_file: .env
+    depends_on: [qdrant, embed_head]
+    ports:
+      - "8300:8000"          # POST /memory here
+    restart: unless-stopped
+
+  # ------------- read path ----------------
+  contextualizer:
+    build: ./contextualizer
+    env_file: .env
+    depends_on: [qdrant]
+    ports:
+      - "8000:8000"          # POST /context here
+    restart: unless-stopped
+
+volumes:
+  qdrant_data:
